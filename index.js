@@ -4,12 +4,15 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-function main() {
-  fetchUserInfo('takamuu')
-    .catch((error) => {
-      // Promiseチェーンの中で発生したエラーを受け取る
-      console.error(`エラーが発生しました(${error})`);
-    });
+async function main() {
+  try {
+    const userId = getUserId();
+    const userInfo = await fetchUserInfo(userId);
+    const view = createView(userInfo);
+    displayView(view);
+  } catch (error) {
+    console.error(`エラーが発生しました(${error})`);
+  }
 }
 
 function fetchUserInfo(userId) {
@@ -21,13 +24,13 @@ function fetchUserInfo(userId) {
         // エラーレスポンスからRejectedなPromiseを作成して返す
         return Promise.reject(new Error(`${response.status}: ${response.statusText}`));
       }
-      return response.json().then((userInfo) => {
-        // HTMLの組み立て
-        const view = createView(userInfo);
-        // HTMLの挿入
-        displayView(view);
-      });
+      // JSONオブジェクトで解決されるPromiseを返す
+      return response.json();
     });
+}
+
+function getUserId() {
+  return document.getElementById('userId').value;
 }
 
 function createView(userInfo) {
